@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:local": "vite --config vite.config.local.ts --mode local",
+    "dev:local": "vite --config vite.config.local.ts --mode standalone",
     "build": "vite build --base=/assets/erpnext/banking/ && yarn copy-html-entry",
-    "build:local": "vite build --config vite.config.local.ts --mode local",
+    "build:local": "vite build --config vite.config.local.ts --mode standalone",
     "lint": "eslint .",
     "preview": "vite preview",
     "preview:local": "vite preview --config vite.config.local.ts",
