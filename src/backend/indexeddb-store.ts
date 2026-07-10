@@ -261,7 +261,7 @@ const tableDefinitions: Record<string, string> = {
   payment_entries: 'name,creation,modified,docstatus,company,party_type,party,posting_date',
 }
 
-class IndexedDBStore {
+export class IndexedDBStore {
   private db: BankingDatabase | null = null
   private initialized = false
 

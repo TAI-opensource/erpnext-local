@@ -1,0 +1,1 @@
+import{m as e}from"./vendor-BQGmn56B.js";var t=new(e()).Parser,n=/^-?\d+(\.\d+)?$/;function r(e,r){let i=e.trim();if(!i)return 0;if(n.test(i))return Number(i);try{let e=t.parse(i).evaluate({transaction_amount:r});return typeof e!=`number`||!Number.isFinite(e)?0:e}catch(e){return 0}}export{r as t};

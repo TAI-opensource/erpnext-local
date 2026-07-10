@@ -1,0 +1,1 @@
+import{At as e}from"./vendor-BQGmn56B.js";import{u as t}from"./error-banner-Cbg72c_0.js";import{i as n}from"./typography-u8W8WSBM.js";var r=e(),i=({text:e,className:i})=>(0,r.jsx)(`div`,{className:t(`min-h-[50vh] flex items-center justify-center`,i),children:(0,r.jsx)(n,{children:e})});export{i as t};
