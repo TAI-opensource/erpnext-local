@@ -22,7 +22,7 @@ interface TableSchema {
 type SqlParams = Record<string, SqlValue> | SqlValue[]
 
 const DEFAULT_CONFIG: Required<SQLiteEngineConfig> = {
-  wasmPath: '/wasm/',
+  wasmPath: 'https://sql.js.org/dist/',
   autoSave: true,
   autoSaveInterval: 30000,
   indexedDBName: 'erpnext_banking_db',

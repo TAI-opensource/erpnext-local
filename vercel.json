@@ -3,18 +3,7 @@
   "outputDirectory": "dist-local",
   "framework": "vite",
   "installCommand": "yarn install",
-  "cleanUrls": false,
-  "trailingSlash": false,
   "headers": [
-    {
-      "source": "/wasm/(.*)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/wasm"
-        }
-      ]
-    },
     {
       "source": "/assets/(.*)",
       "headers": [
@@ -27,7 +16,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!.*\\..*|wasm).*)",
+      "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
     }
   ]
