@@ -26,13 +26,16 @@ export default defineConfig({
     target: 'es2015',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react-dom', 'react'],
-          'vendor-frappe': ['frappe-react-sdk'],
-          'vendor-tanstack': ['@tanstack/react-table', '@tanstack/react-virtual'],
-          'vendor-radix': ['radix-ui'],
-          'vendor-jotai': ['jotai'],
-          'vendor-lucide': ['lucide-react'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-dom') || id.includes('/react/')) return 'vendor-react'
+            if (id.includes('frappe-react-sdk')) return 'vendor-frappe'
+            if (id.includes('@tanstack')) return 'vendor-tanstack'
+            if (id.includes('radix-ui')) return 'vendor-radix'
+            if (id.includes('jotai')) return 'vendor-jotai'
+            if (id.includes('lucide-react')) return 'vendor-lucide'
+            return 'vendor'
+          }
         },
       },
     },
