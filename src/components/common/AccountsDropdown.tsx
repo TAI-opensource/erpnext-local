@@ -43,9 +43,7 @@ const AccountsDropdown = ({ root_type, report_type, account_type, value, onChang
         if (!data) return []
 
         const grouped: Record<string, Account[]> = data.reduce((acc, account) => {
-            const parentAccount = account.parent_account
-            if (!parentAccount) return acc
-
+            const parentAccount = account.parent_account || _('Other')
             if (!acc[parentAccount]) {
                 acc[parentAccount] = []
             }

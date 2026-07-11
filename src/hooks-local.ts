@@ -30,11 +30,18 @@ interface SWROptions {
   [key: string]: any
 }
 
+interface MutateOptions<T> {
+  optimisticData?: T
+  revalidate?: boolean
+  populateCache?: boolean
+  rollbackOnError?: boolean
+}
+
 interface HookResult<T> {
   data: T | undefined
   error: any
   isLoading: boolean
-  mutate: () => void
+  mutate: (data?: Promise<T> | T | undefined, opts?: MutateOptions<T>) => Promise<T | undefined>
 }
 
 function useSWRLike<T>(key: string | null, fetcher: () => Promise<T>): HookResult<T> {
@@ -43,22 +50,35 @@ function useSWRLike<T>(key: string | null, fetcher: () => Promise<T>): HookResul
   const [isLoading, setIsLoading] = useState(true)
   const mountedRef = useRef(true)
 
-  const mutate = useCallback(() => {
-    setIsLoading(true)
-    if (!key || !mountedRef.current) return
-    fetcher()
-      .then((result) => {
-        if (mountedRef.current) {
-          setData(result)
-          setIsLoading(false)
-        }
-      })
-      .catch((err) => {
-        if (mountedRef.current) {
-          setError(err)
-          setIsLoading(false)
-        }
-      })
+  const mutate = useCallback(async (dataOrPromise?: Promise<T> | T | undefined, opts?: MutateOptions<T>): Promise<T | undefined> => {
+    // Apply optimistic data if provided
+    if (opts?.optimisticData !== undefined) {
+      setData(opts.optimisticData)
+    }
+
+    let newData: T
+    try {
+      if (dataOrPromise instanceof Promise) {
+        newData = await dataOrPromise
+      } else if (dataOrPromise !== undefined) {
+        newData = dataOrPromise as T
+      } else {
+        // No data provided, just revalidate
+        if (!key || !mountedRef.current) return data
+        newData = await fetcher()
+      }
+      if (mountedRef.current) {
+        setData(newData)
+        setIsLoading(false)
+      }
+      return newData
+    } catch (err) {
+      if (mountedRef.current) {
+        setError(err)
+        setIsLoading(false)
+      }
+      throw err
+    }
   }, [key])
 
   useEffect(() => {

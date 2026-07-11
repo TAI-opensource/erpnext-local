@@ -507,6 +507,51 @@ const TABLE_SCHEMAS: TableSchema[] = [
       { name: 'hidden', type: 'INTEGER', defaultValue: 0 },
     ],
   },
+  // Bank Transaction Rules
+  {
+    name: 'bank_transaction_rule',
+    primaryKey: 'name',
+    columns: [
+      { name: 'name', type: 'TEXT', notNull: true },
+      { name: 'rule_name', type: 'TEXT' },
+      { name: 'transaction_type', type: 'TEXT', defaultValue: 'Any' },
+      { name: 'priority', type: 'INTEGER', defaultValue: 0 },
+      { name: 'min_amount', type: 'REAL', defaultValue: 0 },
+      { name: 'max_amount', type: 'REAL', defaultValue: 0 },
+      { name: 'rule_description', type: 'TEXT' },
+      { name: 'company', type: 'TEXT' },
+      { name: 'classify_as', type: 'TEXT', defaultValue: 'Bank Entry' },
+      { name: 'account', type: 'TEXT' },
+      { name: 'bank_entry_type', type: 'TEXT' },
+      { name: 'party_type', type: 'TEXT' },
+      { name: 'party', type: 'TEXT' },
+      { name: 'owner', type: 'TEXT' },
+      { name: 'modified_by', type: 'TEXT' },
+      { name: 'docstatus', type: 'INTEGER', defaultValue: 0 },
+      { name: 'creation', type: 'TEXT' },
+      { name: 'modified', type: 'TEXT' },
+      { name: 'created_at', type: 'TEXT' },
+      { name: 'modified_at', type: 'TEXT' },
+      { name: 'description_rules', type: 'TEXT' },
+      { name: 'accounts', type: 'TEXT' },
+    ],
+  },
+  // Accounts Settings (Singleton)
+  {
+    name: 'accounts_settings',
+    primaryKey: 'name',
+    columns: [
+      { name: 'name', type: 'TEXT', notNull: true },
+      { name: 'accounts_frozen_upto', type: 'TEXT' },
+      { name: 'allow_cost_center_in_entry_of_sheet', type: 'INTEGER', defaultValue: 0 },
+      { name: 'auto_process_incoming_bank_transfers', type: 'INTEGER', defaultValue: 0 },
+      { name: 'transfer_match_days', type: 'INTEGER', defaultValue: 0 },
+      { name: 'automatically_run_rules_on_unreconciled_transactions', type: 'INTEGER', defaultValue: 0 },
+      { name: 'enable_party_matching', type: 'INTEGER', defaultValue: 0 },
+      { name: 'enable_fuzzy_matching', type: 'INTEGER', defaultValue: 0 },
+      { name: 'modified_at', type: 'TEXT' },
+    ],
+  },
 ];
 
 // ============================================================================
@@ -777,6 +822,15 @@ function generateSeedData(): Record<string, unknown[]> {
         modified_at: now,
       },
     ],
+    accounts_settings: [
+      {
+        name: 'Accounts Settings',
+        transfer_match_days: 4,
+        automatically_run_rules_on_unreconciled_transactions: 0,
+        enable_party_matching: 1,
+        enable_fuzzy_matching: 0,
+      },
+    ],
   };
 }
 
@@ -874,6 +928,29 @@ export class DatabaseManager {
       const savedData = await this.loadSQLiteFromIndexedDb();
       if (savedData) {
         this.db = new this.sql.Database(savedData);
+
+        // Check schema version — recreate if outdated
+        try {
+          const result = this.db.exec("SELECT value FROM _schema_meta WHERE key = 'version'");
+          const savedVersion = result.length > 0 ? parseInt(result[0].values[0][0] as string, 10) : 0;
+          const currentVersion = getSchemaVersion();
+          if (savedVersion < currentVersion) {
+            console.log(`Schema version mismatch (saved: ${savedVersion}, current: ${currentVersion}). Recreating database...`);
+            this.db.close();
+            this.db = new this.sql.Database();
+            await this.createTables();
+            await this.seedData();
+            await this.createIndexes();
+          }
+        } catch {
+          // _schema_meta table doesn't exist — fresh DB needed
+          console.log('No schema version found. Recreating database...');
+          this.db.close();
+          this.db = new this.sql.Database();
+          await this.createTables();
+          await this.seedData();
+          await this.createIndexes();
+        }
       } else {
         this.db = new this.sql.Database();
         await this.createTables();

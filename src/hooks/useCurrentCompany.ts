@@ -1,9 +1,16 @@
 import { useAtomValue } from "jotai"
 import { atomWithStorage } from "jotai/utils"
 
-export const selectedCompanyAtom = atomWithStorage<string>('bank-rec-selected-company', window.frappe?.boot?.user?.defaults?.company || '')
+function getDefaultCompany(): string {
+    const frappe = window as any
+    return frappe?.frappe?.boot?.user?.defaults?.company
+        || frappe?.frappe?.boot?.defaults?.company
+        || '_Test Company'
+}
+
+export const selectedCompanyAtom = atomWithStorage<string>('bank-rec-selected-company', getDefaultCompany())
 
 export const useCurrentCompany = () => {
     const selectedCompany = useAtomValue(selectedCompanyAtom)
-    return selectedCompany ? selectedCompany : (window.frappe?.boot?.user?.defaults?.company as string)
+    return selectedCompany || getDefaultCompany()
 }

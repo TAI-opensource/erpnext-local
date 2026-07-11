@@ -1005,7 +1005,7 @@ class APIHandlerClass {
         const method = ctx.method
 
         // Skip permission check for local read-only methods
-        if (method === 'frappe.client.get_list' || method === 'frappe.client.get_count') {
+        if (method === 'frappe.client.get_list' || method === 'frappe.client.get_count' || method === 'frappe.client.get' || method === 'frappe.client.save' || method === 'frappe.client.set_value' || method === 'frappe.client.get_value' || method.startsWith('frappe.desk.')) {
             return
         }
 

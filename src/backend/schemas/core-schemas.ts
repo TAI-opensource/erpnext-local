@@ -970,7 +970,12 @@ CREATE TABLE IF NOT EXISTS accounts_settings (
   name TEXT PRIMARY KEY,
   accounts_frozen_upto TEXT,
   allow_cost_center_in_entry_of_sheet INTEGER DEFAULT 0,
-  auto_process_incoming_bank_transfers INTEGER DEFAULT 0
+  auto_process_incoming_bank_transfers INTEGER DEFAULT 0,
+  transfer_match_days INTEGER DEFAULT 0,
+  automatically_run_rules_on_unreconciled_transactions INTEGER DEFAULT 0,
+  enable_party_matching INTEGER DEFAULT 0,
+  enable_fuzzy_matching INTEGER DEFAULT 0,
+  modified_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS cost_center_allocation (

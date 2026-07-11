@@ -252,7 +252,10 @@ const defaultBoot: FrappeBoot = {
         can_write: [],
         can_create: [],
         can_delete: [],
-        can_cancel: []
+        can_cancel: [],
+        defaults: {
+            company: '_Test Company'
+        }
     },
     doctype_layout: {},
     linked_doctypes: {},

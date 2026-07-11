@@ -744,7 +744,7 @@ export async function handleGetPaymentTerms(args: any): Promise<any> {
 
 export async function handleFrappeClientGet(args: any): Promise<any> {
   const backend = getBackend();
-  const { doctype, filters, fields, limit, start, order_by } = args;
+  const { doctype, name, filters, fields, limit, start, order_by } = args;
 
   // Converter tabela doctype para nome da tabela no SQLite
   const tableName = doctype.toLowerCase().replace(/ /g, '_');
@@ -752,6 +752,12 @@ export async function handleFrappeClientGet(args: any): Promise<any> {
   let sql = 'SELECT * FROM ' + tableName;
   const params: unknown[] = [];
   const conditions: string[] = [];
+
+  // Handle single-doc lookup via `name` param (frappe.client.get)
+  if (name) {
+    conditions.push('name = ?');
+    params.push(name);
+  }
 
   if (filters) {
     if (typeof filters === 'string') {
@@ -763,6 +769,7 @@ export async function handleFrappeClientGet(args: any): Promise<any> {
       for (const filter of filters) {
         if (filter.length === 3) {
           const [field, op, value] = filter;
+          if (value === undefined || value === null) continue;
           if (op === '=') {
             conditions.push(`${field} = ?`);
             params.push(value);
@@ -794,7 +801,14 @@ export async function handleFrappeClientGet(args: any): Promise<any> {
   }
 
   if (order_by) {
-    sql += ' ORDER BY ' + order_by;
+    if (typeof order_by === 'object' && order_by.field) {
+      const validOrder = (order_by.order || 'asc').toLowerCase().includes('desc') ? 'DESC' : 'ASC';
+      sql += ' ORDER BY ' + order_by.field + ' ' + validOrder;
+    } else if (typeof order_by === 'string') {
+      sql += ' ORDER BY ' + order_by;
+    } else {
+      sql += ' ORDER BY name';
+    }
   } else {
     sql += ' ORDER BY name';
   }
@@ -939,20 +953,30 @@ export async function handleFrappeClientInsert(args: any): Promise<any> {
 
   // Preparar dados
   const data: Record<string, unknown> = {
-    ...doc,
     name: doc.name || generateName(),
     created_at: doc.created_at || now,
     modified_at: now,
   };
 
-  // Remover campos não existentes na tabela
-  delete data.doctype;
+  // Copy scalar fields only, serialize arrays/objects to JSON, skip undefined
+  for (const [key, value] of Object.entries(doc)) {
+    if (key === 'doctype') continue;
+    if (key === 'name' && doc.name) continue;
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      data[key] = JSON.stringify(value);
+    } else if (typeof value === 'object' && value !== null) {
+      data[key] = JSON.stringify(value);
+    } else {
+      data[key] = value;
+    }
+  }
 
   try {
     backend.db.insertRow(tableName, data);
     return { message: data };
   } catch (error) {
-    throw new Error(`Failed to insert ${doc.doctype}: ${(error as Error).message}`);
+    throw new Error(`Failed to insert ${doc.doctype}: ${(error as Error)?.message || String(error)}`);
   }
 }
 
@@ -969,9 +993,19 @@ export async function handleFrappeClientSave(args: any): Promise<any> {
 
   // Preparar dados
   const data: Record<string, unknown> = {
-    ...(doc as Record<string, unknown>),
     modified_at: now,
   };
+
+  // Copy scalar fields only, serialize arrays/objects to JSON
+  for (const [key, value] of Object.entries(doc || {})) {
+    if (Array.isArray(value)) {
+      data[key] = JSON.stringify(value);
+    } else if (typeof value === 'object' && value !== null) {
+      data[key] = JSON.stringify(value);
+    } else {
+      data[key] = value;
+    }
+  }
 
   try {
     backend.db.updateRow(tableName, name, data);
@@ -1075,6 +1109,72 @@ export async function handleFrappeClientSetValue(args: any): Promise<any> {
   }
 }
 
+export async function handleSearchLink(args: any): Promise<any> {
+  const backend = getBackend();
+  const { doctype, txt, page_length, filters } = args;
+  const tableName = doctype.toLowerCase().replace(/ /g, '_');
+  const limit = page_length || 20;
+
+  // Determine title field for display
+  const titleField = doctype === 'Company' ? 'company_name' : 
+                     doctype === 'Account' ? 'account_name' :
+                     doctype === 'Customer' ? 'customer_name' :
+                     doctype === 'Supplier' ? 'supplier_name' : '';
+
+  const searchField = titleField || 'name';
+
+  let sql = `SELECT name, "${searchField}" FROM "${tableName}"`;
+  const params: unknown[] = [];
+  const conditions: string[] = [];
+
+  if (txt) {
+    conditions.push(`(name LIKE ? OR "${searchField}" LIKE ?)`);
+    params.push(`%${txt}%`, `%${txt}%`);
+  }
+
+  if (filters) {
+    const parsedFilters = typeof filters === 'string' ? JSON.parse(filters) : filters;
+    if (Array.isArray(parsedFilters)) {
+      for (const filter of parsedFilters) {
+        if (filter.length === 3) {
+          const [field, op, value] = filter;
+          if (op === '=') {
+            conditions.push(`"${field}" = ?`);
+            params.push(value);
+          } else if (op === '!=') {
+            conditions.push(`"${field}" != ?`);
+            params.push(value);
+          } else if (op === 'like') {
+            conditions.push(`"${field}" LIKE ?`);
+            params.push(`%${value}%`);
+          } else if (op === 'in') {
+            conditions.push(`"${field}" IN (${value.map(() => '?').join(',')})`);
+            params.push(...value);
+          }
+        }
+      }
+    }
+  }
+
+  if (conditions.length > 0) {
+    sql += ` WHERE ${conditions.join(' AND ')}`;
+  }
+
+  sql += ` ORDER BY name LIMIT ${limit}`;
+
+  try {
+    const result = backend.db.executeWithHeaders(sql, params);
+    const results = result.values.map((row) => ({
+      value: row[0],
+      description: row[1] || row[0],
+      label: row[1] || row[0],
+    }));
+    return { message: results };
+  } catch {
+    return { message: [] };
+  }
+}
+
 // ============================================================================
 // Handler Registry
 // ============================================================================
@@ -1136,6 +1236,7 @@ export const realHandlers: Record<string, (args: any) => Promise<any>> = {
   'frappe.client.submit': handleFrappeClientSubmit,
   'frappe.client.cancel': handleFrappeClientCancel,
   'frappe.client.set_value': handleFrappeClientSetValue,
+  'frappe.desk.search.search_link': handleSearchLink,
 };
 
 // ============================================================================
