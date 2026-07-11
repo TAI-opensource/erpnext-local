@@ -1009,7 +1009,9 @@ export async function handleFrappeClientSave(args: any): Promise<any> {
 
   try {
     backend.db.updateRow(tableName, name, data);
-    return { message: { name, ...data } };
+    // Return the full document after save (not just updated fields)
+    const row = backend.db.getRow(tableName, name);
+    return { message: row || { name, ...data } };
   } catch (error) {
     throw new Error(`Failed to save ${doctype}: ${(error as Error).message}`);
   }
