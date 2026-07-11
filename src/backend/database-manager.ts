@@ -939,6 +939,7 @@ const TABLE_SCHEMAS: TableSchema[] = [
       { name: 'voucher_detail_no', type: 'TEXT' },
       { name: 'batch_no', type: 'TEXT' },
       { name: 'serial_no', type: 'TEXT' },
+      { name: 'company', type: 'TEXT' },
       { name: 'is_cancelled', type: 'INTEGER', defaultValue: 0 },
       { name: 'creation', type: 'TEXT' },
     ],
