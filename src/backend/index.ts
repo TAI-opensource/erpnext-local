@@ -392,6 +392,9 @@ class LocalBackend {
     if (!window.frappe) {
       window.frappe = {} as any
     }
+    if (!(window as any).locals) {
+      (window as any).locals = {}
+    }
     if (!window.frappe.db) {
       window.frappe.db = {} as any
     }

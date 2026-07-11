@@ -5,6 +5,14 @@ import AppLocal from './App-local.tsx'
 import { DirectionProvider } from './components/ui/direction.tsx'
 import { initBackend } from './backend'
 
+declare global {
+  var locals: Record<string, Record<string, unknown>>
+}
+
+if (!(window as any).locals) {
+  ;(window as any).locals = {}
+}
+
 async function bootstrap() {
   try {
     await initBackend()
