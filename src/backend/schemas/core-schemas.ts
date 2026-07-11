@@ -1018,23 +1018,33 @@ CREATE TABLE IF NOT EXISTS bank_account (
   branch TEXT,
   company TEXT,
   is_default INTEGER DEFAULT 0,
+  is_company_account INTEGER DEFAULT 0,
   disabled INTEGER DEFAULT 0,
-  creation TEXT
+  balance REAL DEFAULT 0,
+  creation TEXT,
+  created_at TEXT,
+  modified_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS bank_transaction (
   name TEXT PRIMARY KEY,
   date TEXT,
   status TEXT,
+  bank_account TEXT,
   account TEXT,
   deposit REAL DEFAULT 0,
   withdrawal REAL DEFAULT 0,
+  balance REAL DEFAULT 0,
   currency TEXT,
   description TEXT,
+  reference_number TEXT,
   allocated_amount REAL DEFAULT 0,
   unallocated_amount REAL DEFAULT 0,
   company TEXT,
-  creation TEXT
+  docstatus INTEGER DEFAULT 1,
+  creation TEXT,
+  created_at TEXT,
+  modified_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS bank_reconciliation_tool (
