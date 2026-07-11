@@ -19,7 +19,14 @@ export const getErrorMessage = (error?: FrappeError | null): string => {
  */
 export const getErrorMessages = (error?: FrappeError | null): ParsedErrorMessage[] => {
     if (!error) return []
-    let eMessages: ParsedErrorMessage[] = error?._server_messages ? JSON.parse(error?._server_messages) : []
+    let eMessages: ParsedErrorMessage[] = []
+    try {
+        if (error?._server_messages && typeof error._server_messages === 'string' && error._server_messages.length > 2) {
+            eMessages = JSON.parse(error._server_messages)
+        }
+    } catch {
+        eMessages = []
+    }
     eMessages = eMessages.map((m) => {
         try {
 
