@@ -82,36 +82,47 @@ function AppLocal() {
                   </Route>
 
                   {/* Accounts Module */}
+                  <Route path="/app/accounts/*" element={<AccountsModule />} />
                   <Route path="/app/accounts" element={<AccountsModule />} />
 
                   {/* Selling Module */}
+                  <Route path="/app/selling/*" element={<SellingModule />} />
                   <Route path="/app/selling" element={<SellingModule />} />
 
                   {/* Buying Module */}
+                  <Route path="/app/buying/*" element={<BuyingModule />} />
                   <Route path="/app/buying" element={<BuyingModule />} />
 
                   {/* Stock Module */}
+                  <Route path="/app/stock/*" element={<StockModule />} />
                   <Route path="/app/stock" element={<StockModule />} />
 
                   {/* HR Module */}
+                  <Route path="/app/hr/*" element={<HRModule />} />
                   <Route path="/app/hr" element={<HRModule />} />
 
                   {/* Payroll Module */}
+                  <Route path="/app/payroll/*" element={<PayrollModule />} />
                   <Route path="/app/payroll" element={<PayrollModule />} />
 
                   {/* Assets Module */}
+                  <Route path="/app/assets/*" element={<AssetsModule />} />
                   <Route path="/app/assets" element={<AssetsModule />} />
 
                   {/* Projects Module */}
+                  <Route path="/app/projects/*" element={<ProjectsModule />} />
                   <Route path="/app/projects" element={<ProjectsModule />} />
 
                   {/* CRM Module */}
+                  <Route path="/app/crm/*" element={<CRMModule />} />
                   <Route path="/app/crm" element={<CRMModule />} />
 
                   {/* Setup Module */}
+                  <Route path="/app/setup/*" element={<SetupModule />} />
                   <Route path="/app/setup" element={<SetupModule />} />
 
                   {/* Reports Module */}
+                  <Route path="/app/reports/*" element={<ReportsModule />} />
                   <Route path="/app/reports" element={<ReportsModule />} />
 
                   <Route path="*" element={<Navigate to="/" replace />} />
