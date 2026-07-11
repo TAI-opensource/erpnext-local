@@ -449,7 +449,9 @@ class LocalBackend {
 
     window.frappe.boot = {
       user: bootUser,
-      docs: [] as unknown as FrappeBootDocs,
+      docs: [
+        { doctype: ':Company', name: '_Test Company', company_name: '_Test Company' },
+      ] as unknown as FrappeBootDocs,
       sysdefaults: {
         currency: 'BRL',
         country: 'Brazil',
