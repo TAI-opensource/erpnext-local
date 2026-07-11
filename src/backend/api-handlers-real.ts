@@ -2,7 +2,7 @@
 // Real API Handlers - Consultas SQLite Locais
 // ============================================================================
 
-import { getBackend } from '../index';
+import { getBackend } from './index';
 
 // ============================================================================
 // Helper Functions

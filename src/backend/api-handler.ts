@@ -705,6 +705,7 @@ class APIHandlerClass {
             let handler: ((args: Record<string, unknown>) => Promise<FrappeResponse>) | undefined
 
             // First, check if there's a real handler for this method
+            const { getRealHandler } = await import('./api-handlers-real')
             const realHandler = getRealHandler(processedCtx.method)
             if (realHandler) {
                 // Wrap real handler to match expected signature
