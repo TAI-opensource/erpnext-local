@@ -430,6 +430,8 @@ export async function handleGetAccountBalance(args: any): Promise<any> {
   const { bank_account, company, till_date } = args;
   const cutoff = till_date || new Date().toISOString().split('T')[0];
 
+  console.log('[DEBUG] handleGetAccountBalance called:', { bank_account, company, cutoff });
+
   // 1. Try GL entries first
   const glResult = backend.db.executeWithHeaders(
     `
@@ -443,6 +445,7 @@ export async function handleGetAccountBalance(args: any): Promise<any> {
     [bank_account, cutoff]
   );
   const glBalance = glResult.values.length > 0 ? (glResult.values[0][0] as number) || 0 : 0;
+  console.log('[DEBUG] GL balance:', glBalance, 'glResult:', glResult.values);
   if (glBalance !== 0) {
     return { message: glBalance };
   }
@@ -452,6 +455,7 @@ export async function handleGetAccountBalance(args: any): Promise<any> {
     `SELECT balance FROM bank_transaction WHERE bank_account = ? AND date <= ? ORDER BY date DESC, created_at DESC LIMIT 1`,
     [bank_account, cutoff]
   );
+  console.log('[DEBUG] BT balance:', btResult.values, 'bank_account:', bank_account);
   if (btResult.values.length > 0 && btResult.values[0][0] != null) {
     return { message: btResult.values[0][0] };
   }
@@ -461,6 +465,7 @@ export async function handleGetAccountBalance(args: any): Promise<any> {
     `SELECT balance FROM bank_account WHERE name = ?`,
     [bank_account]
   );
+  console.log('[DEBUG] Acct balance fallback:', acctResult.values, 'bank_account:', bank_account);
   const acctBalance = acctResult.values.length > 0 ? (acctResult.values[0][0] as number) || 0 : 0;
   return { message: acctBalance };
 }
@@ -1144,6 +1149,7 @@ export const realHandlers: Record<string, (args: any) => Promise<any>> = {
 
   // Frappe Client - CRUD
   'frappe.client.get': handleFrappeClientGet,
+  'frappe.client.get_list': handleFrappeClientGet,
   'frappe.client.get_count': handleFrappeClientGetCount,
   'frappe.client.get_value': handleFrappeClientGetValue,
   'frappe.client.insert': handleFrappeClientInsert,
