@@ -430,42 +430,20 @@ export async function handleGetAccountBalance(args: any): Promise<any> {
   const { bank_account, company, till_date } = args;
   const cutoff = till_date || new Date().toISOString().split('T')[0];
 
-  console.log('[DEBUG] handleGetAccountBalance called:', { bank_account, company, cutoff });
-
-  // 1. Try GL entries first
-  const glResult = backend.db.executeWithHeaders(
-    `
-    SELECT 
-      COALESCE(SUM(debit), 0) - COALESCE(SUM(credit), 0) as balance
-    FROM gl_entry
-    WHERE account = ?
-    AND posting_date <= ?
-    AND is_cancelled = 0
-  `,
-    [bank_account, cutoff]
-  );
-  const glBalance = glResult.values.length > 0 ? (glResult.values[0][0] as number) || 0 : 0;
-  console.log('[DEBUG] GL balance:', glBalance, 'glResult:', glResult.values);
-  if (glBalance !== 0) {
-    return { message: glBalance };
-  }
-
-  // 2. Try last bank_transaction balance before cutoff
+  // Try last bank_transaction balance before cutoff
   const btResult = backend.db.executeWithHeaders(
     `SELECT balance FROM bank_transaction WHERE bank_account = ? AND date <= ? ORDER BY date DESC, created_at DESC LIMIT 1`,
     [bank_account, cutoff]
   );
-  console.log('[DEBUG] BT balance:', btResult.values, 'bank_account:', bank_account);
   if (btResult.values.length > 0 && btResult.values[0][0] != null) {
     return { message: btResult.values[0][0] };
   }
 
-  // 3. Fallback: use bank_account's stored balance (opening balance for new accounts)
+  // Fallback: use bank_account's stored balance
   const acctResult = backend.db.executeWithHeaders(
     `SELECT balance FROM bank_account WHERE name = ?`,
     [bank_account]
   );
-  console.log('[DEBUG] Acct balance fallback:', acctResult.values, 'bank_account:', bank_account);
   const acctBalance = acctResult.values.length > 0 ? (acctResult.values[0][0] as number) || 0 : 0;
   return { message: acctBalance };
 }
