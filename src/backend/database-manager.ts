@@ -705,7 +705,7 @@ export class DatabaseManager {
 
       // 2. Initialize SQLite WASM
       this.sql = await initSqlJs({
-        locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
+        locateFile: (file: string) => `/wasm/${file}`,
       });
 
       // 3. Try to load SQLite from IndexedDB
