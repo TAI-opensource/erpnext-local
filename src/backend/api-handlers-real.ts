@@ -428,9 +428,10 @@ export async function handleReconcileVouchers(args: any): Promise<any> {
 export async function handleGetAccountBalance(args: any): Promise<any> {
   const backend = getBackend();
   const { bank_account, company, till_date } = args;
+  const cutoff = till_date || new Date().toISOString().split('T')[0];
 
-  // Buscar saldo via GL entries ou via bank_transaction
-  const result = backend.db.executeWithHeaders(
+  // 1. Try GL entries first
+  const glResult = backend.db.executeWithHeaders(
     `
     SELECT 
       COALESCE(SUM(debit), 0) - COALESCE(SUM(credit), 0) as balance
@@ -439,12 +440,29 @@ export async function handleGetAccountBalance(args: any): Promise<any> {
     AND posting_date <= ?
     AND is_cancelled = 0
   `,
-    [bank_account, till_date || new Date().toISOString().split('T')[0]]
+    [bank_account, cutoff]
   );
+  const glBalance = glResult.values.length > 0 ? (glResult.values[0][0] as number) || 0 : 0;
+  if (glBalance !== 0) {
+    return { message: glBalance };
+  }
 
-  const balance = result.values.length > 0 ? (result.values[0][0] as number) || 0 : 0;
+  // 2. Try last bank_transaction balance before cutoff
+  const btResult = backend.db.executeWithHeaders(
+    `SELECT balance FROM bank_transaction WHERE bank_account = ? AND date <= ? ORDER BY date DESC, created_at DESC LIMIT 1`,
+    [bank_account, cutoff]
+  );
+  if (btResult.values.length > 0 && btResult.values[0][0] != null) {
+    return { message: btResult.values[0][0] };
+  }
 
-  return { message: balance };
+  // 3. Fallback: use bank_account's stored balance (opening balance for new accounts)
+  const acctResult = backend.db.executeWithHeaders(
+    `SELECT balance FROM bank_account WHERE name = ?`,
+    [bank_account]
+  );
+  const acctBalance = acctResult.values.length > 0 ? (acctResult.values[0][0] as number) || 0 : 0;
+  return { message: acctBalance };
 }
 
 export async function handleGetOlderUnreconciledTransactions(args: any): Promise<any> {

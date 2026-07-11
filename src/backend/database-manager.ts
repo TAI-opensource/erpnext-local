@@ -657,7 +657,7 @@ function generateSeedData(): Record<string, unknown[]> {
     bank_transaction: [
       {
         name: 'BATCH-001',
-        date: '2026-01-05',
+        date: '2026-07-02',
         bank_account: '_Test Bank Account',
         deposit: 15000.00,
         withdrawal: 0,
@@ -671,7 +671,7 @@ function generateSeedData(): Record<string, unknown[]> {
       },
       {
         name: 'BATCH-002',
-        date: '2026-01-10',
+        date: '2026-07-05',
         bank_account: '_Test Bank Account',
         deposit: 0,
         withdrawal: 3200.00,
@@ -685,7 +685,7 @@ function generateSeedData(): Record<string, unknown[]> {
       },
       {
         name: 'BATCH-003',
-        date: '2026-01-15',
+        date: '2026-07-08',
         bank_account: '_Test Bank Account',
         deposit: 8500.00,
         withdrawal: 0,
@@ -699,7 +699,7 @@ function generateSeedData(): Record<string, unknown[]> {
       },
       {
         name: 'BATCH-004',
-        date: '2026-01-20',
+        date: '2026-07-10',
         bank_account: '_Test Bank Account',
         deposit: 0,
         withdrawal: 1500.00,
@@ -713,7 +713,7 @@ function generateSeedData(): Record<string, unknown[]> {
       },
       {
         name: 'BATCH-005',
-        date: '2026-01-25',
+        date: '2026-07-12',
         bank_account: '_Test Bank Account',
         deposit: 22000.00,
         withdrawal: 0,
@@ -727,7 +727,7 @@ function generateSeedData(): Record<string, unknown[]> {
       },
       {
         name: 'BATCH-006',
-        date: '2026-01-28',
+        date: '2026-07-15',
         bank_account: '_Test Bank Account',
         deposit: 0,
         withdrawal: 4500.00,
@@ -741,7 +741,7 @@ function generateSeedData(): Record<string, unknown[]> {
       },
       {
         name: 'BATCH-007',
-        date: '2026-01-08',
+        date: '2026-07-03',
         bank_account: '_Test Bank Account - Itau',
         deposit: 10000.00,
         withdrawal: 0,
@@ -755,7 +755,7 @@ function generateSeedData(): Record<string, unknown[]> {
       },
       {
         name: 'BATCH-008',
-        date: '2026-01-12',
+        date: '2026-07-06',
         bank_account: '_Test Bank Account - Itau',
         deposit: 0,
         withdrawal: 2500.00,
