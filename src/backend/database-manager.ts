@@ -1045,6 +1045,7 @@ const TABLE_SCHEMAS: TableSchema[] = [
       { name: 'opportunity_from', type: 'TEXT' },
       { name: 'party_name', type: 'TEXT' },
       { name: 'opportunity_type', type: 'TEXT' },
+      { name: 'source', type: 'TEXT' },
       { name: 'status', type: 'TEXT' },
       { name: 'sales_stage', type: 'TEXT' },
       { name: 'expected_closing', type: 'TEXT' },
