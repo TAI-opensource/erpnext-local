@@ -68,7 +68,7 @@ function AppLocal() {
         <LucideProvider strokeWidth={1.5}>
           <TooltipProvider>
             <ThemeProvider defaultTheme="Automatic" storageKey="erpnext-ui-theme">
-              <BrowserRouter basename="/banking">
+              <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<BankReconciliation />} />
                   <Route path="/statement-importer" element={<BankStatementImporterContainer />}>
