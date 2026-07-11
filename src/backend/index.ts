@@ -389,7 +389,12 @@ class LocalBackend {
 
     const backend = this
 
-    window.frappe = window.frappe ?? { boot: { user: null, docs: {}, sysdefaults: { currency: 'BRL', country: 'Brazil', language: 'pt-BR', time_zone: 'America/Sao_Paulo', date_format: 'dd-mm-yyyy', time_format: 'HH:mm:ss', number_format: '#,###.##', first_day_of_the_week: 'Monday', backup_limit: 3 }, __messages: {} }, call: async () => ({ message: null }), db: { get_value: async () => ({ message: null }), set_value: async () => ({ message: null }), get_single_value: async () => ({ message: null }), get_link_options: async () => ({ message: [] }) } }
+    if (!window.frappe) {
+      window.frappe = {} as any
+    }
+    if (!window.frappe.db) {
+      window.frappe.db = {} as any
+    }
 
     window.frappe.call = async (method: string, args?: Record<string, unknown>, options?: CallOptions): Promise<FrappeResponse> => {
       return backend.call(method, args, options)
