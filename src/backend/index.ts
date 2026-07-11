@@ -442,7 +442,7 @@ class LocalBackend {
 
     window.frappe.boot = {
       user: bootUser,
-      docs: {},
+      docs: [] as unknown as FrappeBootDocs,
       sysdefaults: {
         currency: 'BRL',
         country: 'Brazil',
