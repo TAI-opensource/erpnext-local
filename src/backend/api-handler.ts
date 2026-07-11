@@ -1004,6 +1004,11 @@ class APIHandlerClass {
     private checkPermissions(ctx: InterceptorContext): void {
         const method = ctx.method
 
+        // Skip permission check for local read-only methods
+        if (method === 'frappe.client.get_list' || method === 'frappe.client.get_count') {
+            return
+        }
+
         // Determine operation type from method
         let operation: string
         if (method.includes('insert') || method.includes('create')) {
