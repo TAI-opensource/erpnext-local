@@ -749,7 +749,7 @@ export class DatabaseManager {
     for (const schema of TABLE_SCHEMAS) {
       const columnDefs = schema.columns
         .map((col) => {
-          const parts = [col.name, col.type];
+          const parts = [`"${col.name}"`, col.type];
           if (col.notNull) parts.push('NOT NULL');
           if (col.unique) parts.push('UNIQUE');
           if (col.defaultValue !== undefined) {
@@ -759,8 +759,8 @@ export class DatabaseManager {
         })
         .join(', ');
 
-      const pkClause = schema.primaryKey ? `, PRIMARY KEY (${schema.primaryKey})` : '';
-      const sql = `CREATE TABLE IF NOT EXISTS ${schema.name} (${columnDefs}${pkClause});`;
+      const pkClause = schema.primaryKey ? `, PRIMARY KEY ("${schema.primaryKey}")` : '';
+      const sql = `CREATE TABLE IF NOT EXISTS "${schema.name}" (${columnDefs}${pkClause});`;
       this.db.run(sql);
     }
   }
@@ -778,8 +778,9 @@ export class DatabaseManager {
       if (!rows.length) continue;
 
       const columns = Object.keys(rows[0]);
+      const quotedColumns = columns.map(c => `"${c}"`);
       const placeholders = columns.map(() => '?').join(', ');
-      const sql = `INSERT OR IGNORE INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders});`;
+      const sql = `INSERT OR IGNORE INTO "${tableName}" (${quotedColumns.join(', ')}) VALUES (${placeholders});`;
 
       for (const row of rows) {
         const values = columns.map((col) => (row as Record<string, unknown>)[col] ?? null);
@@ -798,7 +799,7 @@ export class DatabaseManager {
     for (const [tableName, indexColumns] of Object.entries(TABLE_INDEXES)) {
       for (const column of indexColumns) {
         const indexName = `idx_${tableName}_${column}`;
-        const sql = `CREATE INDEX IF NOT EXISTS ${indexName} ON ${tableName} (${column});`;
+        const sql = `CREATE INDEX IF NOT EXISTS "${indexName}" ON "${tableName}" ("${column}");`;
         this.db.run(sql);
       }
     }
@@ -1018,7 +1019,7 @@ export class DatabaseManager {
   private getTableRecordCount(tableName: string): number {
     if (!this.db) return 0;
     try {
-      const result = this.db.exec(`SELECT COUNT(*) as cnt FROM ${tableName};`);
+      const result = this.db.exec(`SELECT COUNT(*) as cnt FROM "${tableName}";`);
       if (result.length > 0 && result[0].values.length > 0) {
         return result[0].values[0][0] as number;
       }
@@ -1083,7 +1084,7 @@ export class DatabaseManager {
 
   getRow(tableName: string, name: string): Record<string, unknown> | null {
     if (!this.db) throw new Error('Database not initialized');
-    const result = this.db.exec(`SELECT * FROM ${tableName} WHERE name = ?;`, [name]);
+    const result = this.db.exec(`SELECT * FROM "${tableName}" WHERE name = ?;`, [name]);
     if (result.length === 0 || result[0].values.length === 0) return null;
     const columns = result[0].columns;
     const row = result[0].values[0];
@@ -1097,7 +1098,7 @@ export class DatabaseManager {
   getRows(tableName: string, filters?: Record<string, unknown>): Record<string, unknown>[] {
     if (!this.db) throw new Error('Database not initialized');
 
-    let sql = `SELECT * FROM ${tableName}`;
+    let sql = `SELECT * FROM "${tableName}"`;
     const params: unknown[] = [];
 
     if (filters && Object.keys(filters).length > 0) {
@@ -1126,23 +1127,24 @@ export class DatabaseManager {
   insertRow(tableName: string, data: Record<string, unknown>): void {
     if (!this.db) throw new Error('Database not initialized');
     const columns = Object.keys(data);
+    const quotedColumns = columns.map(c => `"${c}"`);
     const values = Object.values(data);
     const placeholders = columns.map(() => '?').join(', ');
-    const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders});`;
+    const sql = `INSERT INTO "${tableName}" (${quotedColumns.join(', ')}) VALUES (${placeholders});`;
     this.db.run(sql, values as never[]);
   }
 
   updateRow(tableName: string, name: string, data: Record<string, unknown>): void {
     if (!this.db) throw new Error('Database not initialized');
-    const setClauses = Object.keys(data).map((key) => `${key} = ?`);
+    const setClauses = Object.keys(data).map((key) => `"${key}" = ?`);
     const values = [...Object.values(data), name];
-    const sql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE name = ?;`;
+    const sql = `UPDATE "${tableName}" SET ${setClauses.join(', ')} WHERE name = ?;`;
     this.db.run(sql, values as never[]);
   }
 
   deleteRow(tableName: string, name: string): void {
     if (!this.db) throw new Error('Database not initialized');
-    this.db.run(`DELETE FROM ${tableName} WHERE name = ?;`, [name]);
+    this.db.run(`DELETE FROM "${tableName}" WHERE name = ?;`, [name]);
   }
 }
 
