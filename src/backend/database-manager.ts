@@ -1803,7 +1803,7 @@ export class DatabaseManager {
         const merged = { ...row };
         for (const col of notNullCols) {
           if (merged[col.name] === undefined || merged[col.name] === null) {
-            merged[col.name] = col.defaultValue ?? now;
+            merged[col.name] = col.defaultValue ?? new Date().toISOString();
           }
         }
         return merged;
