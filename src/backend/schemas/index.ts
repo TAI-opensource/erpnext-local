@@ -1,7 +1,7 @@
 import { createCoreSchemas } from './core-schemas'
 import { createExtendedSchemas } from './extended-schemas'
 
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 4
 
 export function createAllSchemas(): string {
   const core = createCoreSchemas()
