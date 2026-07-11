@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { Link, useLocation } from "react-router"
 import { ModuleLayout } from "@/components/ui/module-layout"
 import { ListView } from "@/components/ui/list-view"
 import { useFrappeGetDocList } from "frappe-react-sdk"
@@ -8,127 +7,98 @@ import { useAtom } from "jotai"
 import { selectedCompanyAtom } from "@/hooks/useCurrentCompany"
 import { Users, Building2, Briefcase, CalendarCheck, FileText, Clock } from "lucide-react"
 
-const sidebarLinks = [
-  { label: "Employee", path: "/modules/hr/employee", icon: Users },
-  { label: "Department", path: "/modules/hr/department", icon: Building2 },
-  { label: "Designation", path: "/modules/hr/designation", icon: Briefcase },
-  { label: "Attendance", path: "/modules/hr/attendance", icon: CalendarCheck },
-  { label: "Leave Application", path: "/modules/hr/leave-application", icon: FileText },
-  { label: "Shift Type", path: "/modules/hr/shift-type", icon: Clock },
+const sidebarItems = [
+  { label: "Employee", route: "/app/hr/employee", icon: <Users className="h-4 w-4" /> },
+  { label: "Department", route: "/app/hr/department", icon: <Building2 className="h-4 w-4" /> },
+  { label: "Designation", route: "/app/hr/designation", icon: <Briefcase className="h-4 w-4" /> },
+  { label: "Attendance", route: "/app/hr/attendance", icon: <CalendarCheck className="h-4 w-4" /> },
+  { label: "Leave Application", route: "/app/hr/leave-application", icon: <FileText className="h-4 w-4" /> },
+  { label: "Shift Type", route: "/app/hr/shift-type", icon: <Clock className="h-4 w-4" /> },
 ]
 
-const employeeColumns: ColumnDef<any, any>[] = [
-  { accessorKey: "name", header: "ID" },
-  { accessorKey: "employee_name", header: "Name" },
-  { accessorKey: "department", header: "Department" },
-  { accessorKey: "designation", header: "Designation" },
-  { accessorKey: "company", header: "Company" },
-  { accessorKey: "status", header: "Status" },
-]
-
-const departmentColumns: ColumnDef<any, any>[] = [
-  { accessorKey: "name", header: "ID" },
-  { accessorKey: "department_name", header: "Department Name" },
-  { accessorKey: "company", header: "Company" },
-  { accessorKey: "parent_department", header: "Parent Department" },
-]
-
-const designationColumns: ColumnDef<any, any>[] = [
-  { accessorKey: "name", header: "ID" },
-  { accessorKey: "designation_name", header: "Designation" },
-]
-
-const attendanceColumns: ColumnDef<any, any>[] = [
-  { accessorKey: "name", header: "ID" },
-  { accessorKey: "employee", header: "Employee" },
-  { accessorKey: "employee_name", header: "Name" },
-  { accessorKey: "attendance_date", header: "Date" },
-  { accessorKey: "status", header: "Status" },
-]
-
-const leaveColumns: ColumnDef<any, any>[] = [
-  { accessorKey: "name", header: "ID" },
-  { accessorKey: "employee", header: "Employee" },
-  { accessorKey: "employee_name", header: "Name" },
-  { accessorKey: "leave_type", header: "Leave Type" },
-  { accessorKey: "from_date", header: "From" },
-  { accessorKey: "to_date", header: "To" },
-  { accessorKey: "status", header: "Status" },
-]
-
-const shiftTypeColumns: ColumnDef<any, any>[] = [
-  { accessorKey: "name", header: "ID" },
-  { accessorKey: "shift_type_name", header: "Shift Type" },
-  { accessorKey: "start_time", header: "Start Time" },
-  { accessorKey: "end_time", header: "End Time" },
-]
-
-const docTypeConfig: Record<string, { fields: string[]; columns: ColumnDef<any, any>[]; label: string }> = {
-  employee: { fields: ["name", "employee_name", "department", "designation", "company", "status"], columns: employeeColumns, label: "Employee" },
-  department: { fields: ["name", "department_name", "company", "parent_department"], columns: departmentColumns, label: "Department" },
-  designation: { fields: ["name", "designation_name"], columns: designationColumns, label: "Designation" },
-  attendance: { fields: ["name", "employee", "employee_name", "attendance_date", "status"], columns: attendanceColumns, label: "Attendance" },
-  "leave-application": { fields: ["name", "employee", "employee_name", "leave_type", "from_date", "to_date", "status"], columns: leaveColumns, label: "Leave Application" },
-  "shift-type": { fields: ["name", "shift_type_name", "start_time", "end_time"], columns: shiftTypeColumns, label: "Shift Type" },
+const columns: Record<string, { doctype: string; fields: string[]; columns: ColumnDef<any, unknown>[] }> = {
+  employee: { doctype: "Employee", fields: ["name", "employee_name", "department", "designation", "company", "status"], columns: [
+    { accessorKey: "name", header: "ID", size: 120 },
+    { accessorKey: "employee_name", header: "Name", size: 200 },
+    { accessorKey: "department", header: "Department", size: 150 },
+    { accessorKey: "designation", header: "Designation", size: 150 },
+    { accessorKey: "company", header: "Company", size: 150 },
+    { accessorKey: "status", header: "Status", size: 100 },
+  ]},
+  department: { doctype: "Department", fields: ["name", "department_name", "company", "parent_department"], columns: [
+    { accessorKey: "name", header: "ID", size: 120 },
+    { accessorKey: "department_name", header: "Department Name", size: 200 },
+    { accessorKey: "company", header: "Company", size: 150 },
+    { accessorKey: "parent_department", header: "Parent", size: 150 },
+  ]},
+  designation: { doctype: "Designation", fields: ["name", "designation_name"], columns: [
+    { accessorKey: "name", header: "ID", size: 120 },
+    { accessorKey: "designation_name", header: "Designation Name", size: 200 },
+  ]},
+  attendance: { doctype: "Attendance", fields: ["name", "employee", "employee_name", "attendance_date", "status"], columns: [
+    { accessorKey: "name", header: "ID", size: 120 },
+    { accessorKey: "employee", header: "Employee", size: 120 },
+    { accessorKey: "employee_name", header: "Name", size: 200 },
+    { accessorKey: "attendance_date", header: "Date", size: 120 },
+    { accessorKey: "status", header: "Status", size: 100 },
+  ]},
+  "leave-application": { doctype: "Leave Application", fields: ["name", "employee", "employee_name", "leave_type", "status", "from_date", "to_date"], columns: [
+    { accessorKey: "name", header: "ID", size: 120 },
+    { accessorKey: "employee", header: "Employee", size: 120 },
+    { accessorKey: "employee_name", header: "Name", size: 200 },
+    { accessorKey: "leave_type", header: "Leave Type", size: 120 },
+    { accessorKey: "status", header: "Status", size: 100 },
+  ]},
+  "shift-type": { doctype: "Shift Type", fields: ["name", "shift_type_name", "start_time", "end_time"], columns: [
+    { accessorKey: "name", header: "ID", size: 120 },
+    { accessorKey: "shift_type_name", header: "Shift Name", size: 200 },
+    { accessorKey: "start_time", header: "Start", size: 100 },
+    { accessorKey: "end_time", header: "End", size: 100 },
+  ]},
 }
 
-export default function HR() {
-  const location = useLocation()
+export default function HRModule() {
   const [selectedCompany] = useAtom(selectedCompanyAtom)
-  const pathParts = location.pathname.split("/")
-  const activeKey = pathParts[pathParts.length - 1] || "employee"
-
-  const config = docTypeConfig[activeKey] ?? docTypeConfig.employee
+  const [activeSection, setActiveSection] = useState("employee")
+  const config = columns[activeSection]
 
   const filters: any[] = []
-  if (selectedCompany) {
-    filters.push(["company", "=", selectedCompany])
-  }
+  if (selectedCompany) filters.push(["company", "=", selectedCompany])
 
-  const { data, isLoading } = useFrappeGetDocList(config.label, {
+  const { data, isLoading } = useFrappeGetDocList(config.doctype, {
     fields: config.fields,
-    filters,
+    filters: filters.length ? filters : undefined,
     limit_page_length: 50,
     order_by: "creation desc",
   })
 
-  const sidebar = (
-    <nav className="flex flex-col gap-1 p-2">
-      {sidebarLinks.map((link) => {
-        const Icon = link.icon
-        const isActive = activeKey === link.path.split("/").pop()
-        return (
-          <Link
-            key={link.path}
-            to={link.path}
-            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-              isActive
-                ? "bg-surface-gray-2 text-ink-gray-9 font-medium"
-                : "text-ink-gray-6 hover:bg-surface-gray-1 hover:text-ink-gray-8"
-            }`}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {link.label}
-          </Link>
-        )
-      })}
-    </nav>
-  )
-
   return (
-    <ModuleLayout title="HR" sidebar={sidebar}>
-      {isLoading ? (
-        <div className="flex items-center justify-center p-12">
-          <div className="text-sm text-ink-gray-5">Loading...</div>
-        </div>
-      ) : !data?.length ? (
-        <div className="flex flex-col items-center justify-center p-12 text-center">
-          <Users className="mb-3 h-10 w-10 text-ink-gray-4" />
-          <p className="text-sm text-ink-gray-5">No records found</p>
-        </div>
-      ) : (
-        <ListView columns={config.columns} data={data} />
-      )}
+    <ModuleLayout
+      title="HR"
+      subtitle="Human Resources"
+      icon={<Users className="h-5 w-5" />}
+      sidebarItems={sidebarItems}
+      activeRoute={`/app/hr/${activeSection}`}
+    >
+      <div className="space-y-4">
+        <h2 className="text-p-xl font-semibold text-ink-gray-8">{config.doctype}</h2>
+        {isLoading ? (
+          <div className="flex h-40 items-center justify-center text-ink-gray-4">Loading...</div>
+        ) : (
+          <ListView
+            data={data || []}
+            columns={config.columns}
+            maxHeight={500}
+            emptyState={
+              <div className="flex flex-col items-center gap-2 py-8 text-ink-gray-4">
+                <Users className="h-8 w-8" />
+                <p>No {config.doctype.toLowerCase()} found</p>
+              </div>
+            }
+            onRowClick={(row) => console.log("Selected:", row)}
+          />
+        )}
+      </div>
     </ModuleLayout>
   )
 }

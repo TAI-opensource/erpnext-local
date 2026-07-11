@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { ModuleLayout } from "@/components/ui/module-layout"
 import {
   BookOpen,
@@ -9,17 +10,16 @@ import {
   ShoppingCart,
   Receipt,
 } from "lucide-react"
-import { Link } from "react-router"
 
-const sidebarLinks = [
-  { label: "General Ledger", path: "/modules/reports/general-ledger", icon: BookOpen },
-  { label: "Profit and Loss", path: "/modules/reports/profit-and-loss", icon: TrendingUp },
-  { label: "Balance Sheet", path: "/modules/reports/balance-sheet", icon: Building },
-  { label: "Accounts Receivable", path: "/modules/reports/accounts-receivable", icon: UserCheck },
-  { label: "Accounts Payable", path: "/modules/reports/accounts-payable", icon: UserX },
-  { label: "Stock Balance", path: "/modules/reports/stock-balance", icon: Package },
-  { label: "Sales Register", path: "/modules/reports/sales-register", icon: ShoppingCart },
-  { label: "Purchase Register", path: "/modules/reports/purchase-register", icon: Receipt },
+const sidebarItems = [
+  { label: "General Ledger", route: "/app/reports/general-ledger", icon: <BookOpen className="h-4 w-4" /> },
+  { label: "Profit and Loss", route: "/app/reports/profit-and-loss", icon: <TrendingUp className="h-4 w-4" /> },
+  { label: "Balance Sheet", route: "/app/reports/balance-sheet", icon: <Building className="h-4 w-4" /> },
+  { label: "Accounts Receivable", route: "/app/reports/accounts-receivable", icon: <UserCheck className="h-4 w-4" /> },
+  { label: "Accounts Payable", route: "/app/reports/accounts-payable", icon: <UserX className="h-4 w-4" /> },
+  { label: "Stock Balance", route: "/app/reports/stock-balance", icon: <Package className="h-4 w-4" /> },
+  { label: "Sales Register", route: "/app/reports/sales-register", icon: <ShoppingCart className="h-4 w-4" /> },
+  { label: "Purchase Register", route: "/app/reports/purchase-register", icon: <Receipt className="h-4 w-4" /> },
 ]
 
 const reportCards = [
@@ -73,27 +73,15 @@ const reportCards = [
   },
 ]
 
-const sidebar = (
-  <nav className="flex flex-col gap-1 p-2">
-    {sidebarLinks.map((link) => {
-      const Icon = link.icon
-      return (
-        <Link
-          key={link.path}
-          to={link.path}
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-ink-gray-6 transition-colors hover:bg-surface-gray-1 hover:text-ink-gray-8"
-        >
-          <Icon className="h-4 w-4 shrink-0" />
-          {link.label}
-        </Link>
-      )
-    })}
-  </nav>
-)
-
-export default function Reports() {
+export default function ReportsModule() {
   return (
-    <ModuleLayout title="Reports" sidebar={sidebar}>
+    <ModuleLayout
+      title="Reports"
+      subtitle="Financial Reports"
+      icon={<BookOpen className="h-5 w-5" />}
+      sidebarItems={sidebarItems}
+      activeRoute="/app/reports/general-ledger"
+    >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {reportCards.map((report) => {
           const Icon = report.icon
