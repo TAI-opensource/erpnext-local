@@ -114,7 +114,7 @@ export function useFrappeGetCall<T = any>(
 
   const fetcher = useCallback(async () => {
     const response = await backend.call(method, args)
-    return response.message as T
+    return response as T
   }, [method, JSON.stringify(args)])
 
   return useSWRLike<T>(swrKey, fetcher)
