@@ -117,7 +117,22 @@ export function useFrappeGetCall<T = any>(
     return response as T
   }, [method, JSON.stringify(args)])
 
-  return useSWRLike<T>(swrKey, fetcher)
+  const result = useSWRLike<T>(swrKey, fetcher)
+
+  // Fire onSuccess / onError callbacks when data or error changes
+  useEffect(() => {
+    if (result.data !== undefined && swrOptions?.onSuccess) {
+      swrOptions.onSuccess(result.data)
+    }
+  }, [result.data])
+
+  useEffect(() => {
+    if (result.error && swrOptions?.onError) {
+      swrOptions.onError(result.error)
+    }
+  }, [result.error])
+
+  return result
 }
 
 // ---------------------------------------------------------------------------
