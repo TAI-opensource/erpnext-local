@@ -1794,12 +1794,27 @@ export class DatabaseManager {
     for (const [tableName, rows] of Object.entries(seedData)) {
       if (!rows.length) continue;
 
-      const columns = Object.keys(rows[0]);
+      // Get schema for this table to fill in required NOT NULL columns
+      const schema = TABLE_SCHEMAS.find(s => s.name === tableName);
+      const notNullCols = schema?.columns.filter(c => c.notNull) || [];
+
+      // Merge seed data with required defaults
+      const mergedRows = rows.map(row => {
+        const merged = { ...row };
+        for (const col of notNullCols) {
+          if (merged[col.name] === undefined || merged[col.name] === null) {
+            merged[col.name] = col.defaultValue ?? now;
+          }
+        }
+        return merged;
+      });
+
+      const columns = Object.keys(mergedRows[0]);
       const quotedColumns = columns.map(c => `"${c}"`);
       const placeholders = columns.map(() => '?').join(', ');
       const sql = `INSERT OR IGNORE INTO "${tableName}" (${quotedColumns.join(', ')}) VALUES (${placeholders});`;
 
-      for (const row of rows) {
+      for (const row of mergedRows) {
         const values = columns.map((col) => (row as Record<string, unknown>)[col] ?? null);
         this.db.run(sql, values);
       }
