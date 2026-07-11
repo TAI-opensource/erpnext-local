@@ -109,7 +109,7 @@ export default function Selling() {
   const config = docTypeConfig[activeKey] ?? docTypeConfig.customer
 
   const filters: any[] = []
-  if (selectedCompany) {
+  if (selectedCompany && config.doctype !== 'Customer') {
     filters.push(["company", "=", selectedCompany])
   }
 
