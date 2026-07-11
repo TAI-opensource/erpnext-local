@@ -256,7 +256,7 @@ class LocalBackend {
   }
 
   get sqlite(): SQLiteEngine {
-    if (!this._sqlite) throw new Error('SQLiteEngine not initialized. Call init() first.')
+    if (!this._sqlite) throw new Error('SQLiteEngine not used. Use .db (DatabaseManager) instead.')
     return this._sqlite
   }
 
@@ -281,26 +281,22 @@ class LocalBackend {
 
     this._config = config ?? {}
 
-    // 1. IndexedDB (can exist before)
-    this._indexedDb = await getIndexedDBStore()
-
-    // 2. SQLite (needs IndexedDB for persistence)
-    this._sqlite = new SQLiteEngine(this._config.sqlite)
-    await this._sqlite.init()
-
-    // 3. DatabaseManager (wraps SQLite + IndexedDB + schemas)
+    // 1. DatabaseManager (wraps SQLite WASM + IndexedDB + schemas + seed data)
     this._db = DatabaseManager.getInstance()
     await this._db.init()
 
-    // 4. Auth (needs SQLite/IndexedDB for user tables)
+    // 2. IndexedDB store (for meta operations)
+    this._indexedDb = await getIndexedDBStore()
+
+    // 3. Auth (needs SQLite/IndexedDB for user tables)
     await this._auth.init()
 
-    // 5. SyncManager (optional)
+    // 4. SyncManager (optional)
     if (this._config.sync) {
       this._sync = new SyncManager()
     }
 
-    // 6. Setup Frappe polyfills
+    // 5. Setup Frappe polyfills
     this._setupFrappePolyfills()
     this._setupBootData()
 
@@ -309,10 +305,6 @@ class LocalBackend {
 
   async destroy(): Promise<void> {
     this._sync = null
-    if (this._sqlite) {
-      this._sqlite.destroy()
-      this._sqlite = null
-    }
     if (this._indexedDb) {
       await this._indexedDb.close()
       this._indexedDb = null
