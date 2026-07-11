@@ -300,6 +300,10 @@ class LocalBackend {
     this._setupFrappePolyfills()
     this._setupBootData()
 
+    // 6. Refresh permissions after boot data is loaded
+    // @ts-expect-error _api is private
+    this._api?.permissions?.refresh()
+
     this._initialized = true
   }
 

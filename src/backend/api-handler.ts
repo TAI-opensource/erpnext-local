@@ -258,6 +258,7 @@ class PermissionChecker {
     check(doctype: string, permission: string): boolean {
         const perms = this.userPermissions[permission]
         if (!perms) return false
+        if (perms.includes('*')) return true
         return perms.includes(doctype)
     }
 
